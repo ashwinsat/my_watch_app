@@ -43,7 +43,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-
+@Suppress("DEPRECATION")
 class MainActivity : ComponentActivity() {
 
     private lateinit var geofencingClient: GeofencingClient
@@ -65,11 +65,10 @@ class MainActivity : ComponentActivity() {
             WearApp("Android")
         }
 
-//        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-//        locationRequest = LocationRequest.Builder(locationRequest)
-//        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-//        locationRequest.interval = 10000 // 10 seconds
-
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        locationRequest = LocationRequest()
+        locationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        locationRequest.interval = 10000 // 10 seconds
 
         if (ActivityCompat.checkSelfPermission(
                 this,
