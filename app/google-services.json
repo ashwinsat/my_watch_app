@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "112205381828",
+    "project_id": "hazardhound-85ef0",
+    "storage_bucket": "hazardhound-85ef0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:112205381828:android:dade9de8ae905eabcc0991",
+        "android_client_info": {
+          "package_name": "com.example.my_watch_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjx8k5oU14YqkUbRxsWbfqF1wHcY5Sr84"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
