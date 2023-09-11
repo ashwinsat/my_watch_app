@@ -14,18 +14,34 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.example.my_watch_app.R
@@ -40,6 +56,7 @@ import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
@@ -55,7 +72,23 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         /*      geofencingClient = LocationServices.getGeofencingClient(this)*/
         setContent {
-            WearApp("Android")
+            My_watch_appTheme {
+                // Initialize the NavController
+                val navController = rememberNavController()
+
+                // Define the NavHost for navigation
+                NavHost(navController = navController, startDestination = "splash_screen") {
+                    composable("splash_screen") {
+                        // Display the splash screen
+                        SplashScreen(navController = navController)
+                    }
+                    composable("main_screen") {
+                        // Display the main screen content
+                        WearApp("Android")
+                    }
+                }
+            }
+           // WearApp("Android")
         }
 
         /*        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -218,6 +251,39 @@ fun Greeting(greetingName: String) {
         text = stringResource(R.string.hello_world, greetingName)
     )
 }
+
+@Composable
+fun SplashScreen(navController: NavController) {
+    var isLoading by remember { mutableStateOf(true) }
+
+    // Simulate loading, replace this with your actual loading logic
+    LaunchedEffect(key1 = isLoading) {
+        delay(3000) // Simulate a 3-second loading time
+        isLoading = false
+    }
+
+    if (isLoading) {
+        // Show the splash screen while loading
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.White),
+            contentAlignment = Alignment.Center
+        ) {
+            // Use your app's icon as the image in the splash screen
+            Image(
+                painter = painterResource(id = R.drawable.app_icon), // Replace with your app's icon resource
+                contentDescription = null, // Provide a description if needed
+                modifier = Modifier.fillMaxSize()// Adjust the size as needed
+            )
+        }
+    } else {
+        // Loading is complete, navigate to the main screen or any other destination
+       // navController.navigate("main_screen") // Replace with your desired destination
+    }
+}
+
+
 
 @Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
 @Composable
