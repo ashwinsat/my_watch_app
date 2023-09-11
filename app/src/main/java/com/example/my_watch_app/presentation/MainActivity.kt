@@ -21,7 +21,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,6 +44,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.example.my_watch_app.R
@@ -84,11 +87,12 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("main_screen") {
                         // Display the main screen content
-                        WearApp("Android")
+                        DashboardScreen(navController = navController)
+                        // WearApp("Android")
                     }
                 }
             }
-           // WearApp("Android")
+            // WearApp("Android")
         }
 
         /*        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -279,11 +283,45 @@ fun SplashScreen(navController: NavController) {
         }
     } else {
         // Loading is complete, navigate to the main screen or any other destination
-       // navController.navigate("main_screen") // Replace with your desired destination
+        navController.navigate("main_screen") // Replace with your desired destination
     }
 }
 
+@Composable
+fun DashboardScreen(navController: NavController) {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color.Black
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Button(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                onClick = {
+                    // Handle button click
+                }
+            ) {
+                Text("Button 1")
+            }
 
+            Button(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth(),
+                onClick = {
+                    // Handle button click
+                }
+            ) {
+                Text("Button 2")
+            }
+        }
+    }
+}
 
 @Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
 @Composable

@@ -58,6 +58,7 @@ dependencies {
     implementation("androidx.recyclerview:recyclerview:1.3.0")
     implementation(platform("androidx.compose:compose-bom:2022.10.00"))
     implementation("androidx.compose.ui:ui")
+    implementation("androidx.compose.material3:material3:1.1.1")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.wear.compose:compose-material:1.0.0")
     implementation("androidx.wear.compose:compose-foundation:1.0.0")

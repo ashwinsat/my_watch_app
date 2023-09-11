@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.Lifecycle
 import androidx.wear.tiles.LayoutElementBuilders
 import androidx.wear.tiles.RequestBuilders
 import androidx.wear.tiles.ResourceBuilders
@@ -22,7 +23,7 @@ private const val RESOURCES_VERSION = "0"
 /**
  * Skeleton for a tile with no images.
  */
-class MainTileService : CoroutinesTileService() {
+class MainTileService(override val lifecycle: Lifecycle) : CoroutinesTileService() {
 
     override suspend fun resourcesRequest(
         requestParams: RequestBuilders.ResourcesRequest
