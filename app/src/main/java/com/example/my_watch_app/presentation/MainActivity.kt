@@ -63,6 +63,16 @@ import com.example.my_watch_app.presentation.theme.My_watch_appTheme
 import com.example.my_watch_app.services.GeoLocationServices
 import kotlinx.coroutines.delay
 
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.GeofencingClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Suppress("DEPRECATION")
 class MainActivity : ComponentActivity() {
