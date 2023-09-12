@@ -56,6 +56,10 @@ import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.Text
 import com.example.my_watch_app.R
+import com.example.my_watch_app.geofenceHelper.GeofenceManager
+import com.example.my_watch_app.network.NetworkManager
+import com.example.my_watch_app.network.SampleResponse
+import com.example.my_watch_app.presentation.theme.My_watch_appTheme
 import com.example.my_watch_app.services.GeoLocationServices
 import kotlinx.coroutines.delay
 
@@ -114,6 +118,12 @@ class MainActivity : ComponentActivity() {
             launchService()
         }
 // fetchDataAndHandleResponse()
+        GeofenceManager.getInstance(this).addGeoFence(
+            13.200247,
+            77.728224,
+            40F,
+            this
+        )
     }
 
     private fun launchService() {
