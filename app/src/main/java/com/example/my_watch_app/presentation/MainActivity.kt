@@ -6,6 +6,7 @@
 
 package com.example.my_watch_app.presentation
 
+//import androidx.compose.material3.Surface
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -16,14 +17,22 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Surface
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -34,18 +43,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
-import androidx.navigation.NavController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.wear.compose.material.Button
-import androidx.wear.compose.material.MaterialTheme
+import androidx.wear.compose.material.ButtonDefaults
+import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.Text
 import com.example.my_watch_app.R
 import com.example.my_watch_app.network.NetworkManager
@@ -63,6 +68,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
+
 @Suppress("DEPRECATION")
 class MainActivity : ComponentActivity() {
 
@@ -71,28 +77,19 @@ class MainActivity : ComponentActivity() {
         private lateinit var locationRequest: LocationRequest*/
     private val locationPermissionCode = 1
 
+// TODO
+    // Geo fencing
+    // Compose to add toast
+    // Make notification with message
+    // Button to mark current location as hazardous
+    // buttons to indicate sevearity
+
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         /*      geofencingClient = LocationServices.getGeofencingClient(this)*/
         setContent {
-            My_watch_appTheme {
-                // Initialize the NavController
-                val navController = rememberNavController()
-
-                // Define the NavHost for navigation
-                NavHost(navController = navController, startDestination = "splash_screen") {
-                    composable("splash_screen") {
-                        // Display the splash screen
-                        SplashScreen(navController = navController)
-                    }
-                    composable("main_screen") {
-                        // Display the main screen content
-                        DashboardScreen(navController = navController)
-                        // WearApp("Android")
-                    }
-                }
-            }
-            // WearApp("Android")
+            SplashScreen()
         }
 
         /*        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -229,35 +226,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun WearApp(greetingName: String) {
-    My_watch_appTheme {
-        /* If you have enough items in your list, use [ScalingLazyColumn] which is an optimized
-         * version of LazyColumn for wear devices with some added features. For more information,
-         * see d.android.com/wear/compose.
-         */
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colors.background),
-            verticalArrangement = Arrangement.Center
-        ) {
-            Greeting(greetingName = greetingName)
-        }
-    }
-}
-
-@Composable
-fun Greeting(greetingName: String) {
-    Text(
-        modifier = Modifier.fillMaxWidth(),
-        textAlign = TextAlign.Center,
-        color = MaterialTheme.colors.primary,
-        text = stringResource(R.string.hello_world, greetingName)
-    )
-}
-
-@Composable
-fun SplashScreen(navController: NavController) {
+fun SplashScreen() {
     var isLoading by remember { mutableStateOf(true) }
 
     // Simulate loading, replace this with your actual loading logic
@@ -282,49 +251,133 @@ fun SplashScreen(navController: NavController) {
             )
         }
     } else {
-        // Loading is complete, navigate to the main screen or any other destination
-        navController.navigate("main_screen") // Replace with your desired destination
+        navigateToDashboardScreen()
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(navController: NavController) {
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = Color.Black
+fun navigateToDashboardScreen() {
+    // Create a scroll state to manage the scroll position
+    val scrollState = rememberScrollState()
+    var isNavigateToHazard by remember { mutableStateOf(false) }
+    /*  var showScreen2 by remember { mutableStateOf(false) }
+      var showScreen3 by remember { mutableStateOf(false) }
+  */
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .verticalScroll(scrollState) // Enable vertical scrolling
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Button(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .fillMaxWidth(),
-                onClick = {
-                    // Handle button click
+        // Content goes here
+        TopAppBar(
+            modifier = Modifier.background(Color.Black),
+            colors = TopAppBarDefaults.topAppBarColors(Color.Black),
+            title = {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.app_icon), // Replace with your image resource
+                        contentDescription = null, // Provide a description if needed
+                        modifier = Modifier
+                            .size(120.dp)
+                            .padding(start = 40.dp, end = 8.dp)
+
+                    )
                 }
+            }
+        )
+        if (isNavigateToHazard) {
+            navigateToReportHazards()
+        } else {
+
+            Button(
+                onClick = { isNavigateToHazard = true },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = Color.DarkGray,
+                    contentColor = Color.White
+                )
             ) {
-                Text("Button 1")
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.hazard_icon),
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Report Hazard", style = TextStyle.Default)
+                }
             }
 
             Button(
+                onClick = { /* Handle button click */ },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = Color.DarkGray,
+                    contentColor = Color.White
+                )
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.notifications),
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Notifications", style = TextStyle.Default)
+                }
+            }
+
+            Button(
+                onClick = { /* Handle button click */ },
                 modifier = Modifier
                     .padding(8.dp)
-                    .fillMaxWidth(),
-                onClick = {
-                    // Handle button click
-                }
+                    .align(Alignment.CenterHorizontally)
+                    .size(48.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = Color.DarkGray,
+                    contentColor = Color.White
+                )
             ) {
-                Text("Button 2")
+                Text("More", style = TextStyle.Default)
             }
         }
     }
 }
 
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun navigateToReportHazards() {
+    val scrollState = rememberScrollState()
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .height(50.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Text(text = "Area 0000", modifier = Modifier
+            .align(Alignment.CenterHorizontally)
+            .padding(0.dp))
+
+      //  LazyVerticalGrid(columns = 2, content = ContentPadding() )
+
+    }
+}
+
+
 @Preview(device = Devices.WEAR_OS_SMALL_ROUND, showSystemUi = true)
 @Composable
 fun DefaultPreview() {
-    WearApp("Preview Android")
+//    DashboardScreen(navController = null)
 }
