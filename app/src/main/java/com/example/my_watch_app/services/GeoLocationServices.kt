@@ -10,9 +10,11 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.IBinder
-import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import com.example.my_watch_app.database.FireBaseDBManager
+import com.example.my_watch_app.models.LocationData
 import com.example.my_watch_app.notifications.NotificationHelper
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -22,13 +24,16 @@ import com.google.android.gms.location.LocationServices
 
 
 @Suppress("DEPRECATION")
-public class GeoLocationServices : Service() {
+class GeoLocationServices : Service() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
     private var locationRequest: LocationRequest? = LocationRequest()
+    var lastKnownLocation: Location? = null
 
-    companion object {
+    companion
+
+    object {
         const val CHANNEL_ID = "LocationServiceChannel"
     }
 
@@ -79,17 +84,18 @@ public class GeoLocationServices : Service() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(p0: LocationResult) {
                 p0.lastLocation?.let { location ->
-                    val loc = Location("")
-                    loc.latitude = 13.191266162954298
-                    loc.longitude = 77.73112967869962
-                    val difference = location.distanceTo(loc)
-                    if (difference < 30) {
-                        Log.d("GeoLocationServices", "Hazard..!!!")
-                    } else {
-                        Log.d("GeoLocationServices", "We are good")
+                    lastKnownLocation = location
+                    val hazardLoc = FireBaseDBManager.hazardPoints.find { locData ->
+                        val storedLoc = locData.location
+                        val radius: Long = locData.radius ?: 0
+                        val distance = (storedLoc?.distanceTo(location) ?: 0).toLong()
+                        distance < radius
                     }
-                    Log.d("GeoLocationServices", "onLocationResult received : $p0")
-                    showNotification()
+                    if (hazardLoc != null) {
+                        showNotification(hazardLoc)
+                    }
+                    // Test code
+                    FireBaseDBManager().addHazard(location, "Sample tile", "Type")
                 }
             }
         }
@@ -120,7 +126,11 @@ public class GeoLocationServices : Service() {
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
-    private fun showNotification() {
-        NotificationHelper().showNotification(applicationContext, "Title sample", "Message sample")
+    private fun showNotification(hazardLoc: LocationData) {
+        NotificationHelper().showNotification(
+            applicationContext,
+            hazardLoc.name ?: "",
+            hazardLoc.type ?: ""
+        )
     }
 }

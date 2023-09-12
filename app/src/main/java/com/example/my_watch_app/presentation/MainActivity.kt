@@ -30,6 +30,7 @@ import androidx.core.app.ActivityCompat
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.example.my_watch_app.R
+import com.example.my_watch_app.database.FireBaseDBManager
 import com.example.my_watch_app.presentation.theme.My_watch_appTheme
 import com.example.my_watch_app.services.GeoLocationServices
 
@@ -76,6 +77,7 @@ class MainActivity : ComponentActivity() {
             )
         } else {
             launchService()
+            FireBaseDBManager().getAllHazardLocations()
         }
     }
 
