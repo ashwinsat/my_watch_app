@@ -366,7 +366,7 @@ fun NavigateToReportHazards() {
         )
     }
     var selectedOption by remember { mutableStateOf("Area 1") }
-    val options = listOf("Area 1", "Area 2", "Area 3")
+    val options = listOf("Area 1", "Area 2", "Area 3", "Area 4", "Area 5", "Area 6")
     var expanded by remember { mutableStateOf(false) }
 
     Column(
