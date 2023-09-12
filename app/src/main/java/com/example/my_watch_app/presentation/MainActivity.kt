@@ -57,9 +57,6 @@ import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.Text
 import com.example.my_watch_app.R
 import com.example.my_watch_app.geofenceHelper.GeofenceManager
-import com.example.my_watch_app.network.NetworkManager
-import com.example.my_watch_app.network.SampleResponse
-import com.example.my_watch_app.presentation.theme.My_watch_appTheme
 import com.example.my_watch_app.services.GeoLocationServices
 import kotlinx.coroutines.delay
 
