@@ -8,10 +8,12 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.IBinder
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import com.example.my_watch_app.geofenceHelper.GeofenceManager
 import com.example.my_watch_app.notifications.NotificationHelper
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -73,8 +75,17 @@ public class GeoLocationServices : Service() {
         locationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(p0: LocationResult) {
-                p0.lastLocation?.let {
-                    Log.d("GeoLocationServices", "onLocationResult received : ${p0.toString()}")
+                p0.lastLocation?.let { location ->
+                    val loc = Location("")
+                    loc.latitude = 13.191266162954298
+                    loc.longitude = 77.73112967869962
+                    val difference = location.distanceTo(loc)
+                    if (difference < 30) {
+                        Log.d("GeoLocationServices", "Hazard..!!!")
+                    } else {
+                        Log.d("GeoLocationServices", "We are good")
+                    }
+                    Log.d("GeoLocationServices", "onLocationResult received : $p0")
                     showNotification()
                 }
             }
@@ -115,6 +126,13 @@ public class GeoLocationServices : Service() {
         if (isShown) {
             return
         }
+
+        GeofenceManager.getInstance(this).addGeoFence(
+            13.191266162954298,
+            77.73112967869962,
+            30F,
+            this
+        )
         isShown = true
         NotificationHelper().showNotification(applicationContext, "Title sample", "Message sample")
     }

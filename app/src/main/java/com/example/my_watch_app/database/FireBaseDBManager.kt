@@ -38,4 +38,8 @@ class FireBaseDBManager {
             }
         return returnValue
     }
+
+    fun addHazard(data: LocationData) {
+
+    }
 }
