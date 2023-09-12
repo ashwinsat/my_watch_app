@@ -7,6 +7,7 @@
 package com.example.my_watch_app.presentation
 
 //import androidx.compose.material3.Surface
+
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -15,6 +16,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,7 +33,12 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBar
@@ -47,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -56,17 +64,7 @@ import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.Text
 import com.example.my_watch_app.R
-import com.example.my_watch_app.geofenceHelper.GeofenceManager
 import com.example.my_watch_app.services.GeoLocationServices
-import kotlinx.coroutines.delay
-
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.GeofencingClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 
 @Suppress("DEPRECATION")
@@ -123,12 +121,12 @@ class MainActivity : ComponentActivity() {
             launchService()
         }
 // fetchDataAndHandleResponse()
-        GeofenceManager.getInstance(this).addGeoFence(
-            13.200247,
-            77.728224,
-            40F,
-            this
-        )
+        /*   GeofenceManager.getInstance(this).addGeoFence(
+               13.200247,
+               77.728224,
+               40F,
+               this
+           )*/
     }
 
     private fun launchService() {
@@ -367,6 +365,9 @@ fun NavigateToReportHazards() {
             // Add more items here
         )
     }
+    var selectedOption by remember { mutableStateOf("Area 1") }
+    val options = listOf("Area 1", "Area 2", "Area 3")
+    var expanded by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -375,16 +376,54 @@ fun NavigateToReportHazards() {
             .background(Color.Black),
         verticalArrangement = Arrangement.Top,
     ) {
-        Text(
-            text = "Area 0000", modifier = Modifier
+        /*   Text(
+               text = "Area 0000", modifier = Modifier
+                   .align(Alignment.CenterHorizontally)
+                   .padding(0.dp)
+           )*/
+
+        Box(
+            modifier = Modifier
                 .align(Alignment.CenterHorizontally)
-                .padding(0.dp)
-        )
+                .height(20.dp)
+                .background(color = Color.Transparent, shape = RoundedCornerShape(4.dp))
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { expanded = !expanded }
+                    .padding(start= 64.dp),
+                verticalAlignment = Alignment.CenterVertically
+
+
+            ) {
+                Text(text = selectedOption, color = Color.White)
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = null
+                )
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth().background(color = Color.Black).padding(16.dp)
+            ) {
+                options.forEach { option ->
+                    DropdownMenuItem(onClick = {
+                        selectedOption = option
+                        expanded = false
+                    },
+                        text = { Text(text = option, color = Color.White) })
+
+                }
+            }
+        }
         Spacer(modifier = Modifier.height(8.dp))
 
         LazyVerticalGrid(
             GridCells.Fixed(2), // 2 items per row
-            modifier = Modifier.fillMaxHeight()
+            modifier = Modifier
+                .fillMaxHeight()
                 .padding(start = 54.dp, end = 54.dp)
         ) {
             items(items) { item ->
@@ -404,7 +443,7 @@ fun GridItem(item: GridItemData) {
         modifier = Modifier
             .padding(top = 8.dp)
             .size(32.dp)
-        ) {
+    ) {
         Image(
             painter = painterResource(id = item.icon), // Replace with your custom icon
             contentDescription = null,
