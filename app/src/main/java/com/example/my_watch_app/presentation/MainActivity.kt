@@ -11,26 +11,29 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.util.Log
-import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -53,20 +56,8 @@ import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.Text
 import com.example.my_watch_app.R
-import com.example.my_watch_app.network.NetworkManager
-import com.example.my_watch_app.network.SampleResponse
-import com.example.my_watch_app.presentation.theme.My_watch_appTheme
 import com.example.my_watch_app.services.GeoLocationServices
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.GeofencingClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
-import com.google.android.gms.location.LocationServices
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 @Suppress("DEPRECATION")
@@ -228,49 +219,40 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun SplashScreen() {
     var isLoading by remember { mutableStateOf(true) }
-
-    // Simulate loading, replace this with your actual loading logic
     LaunchedEffect(key1 = isLoading) {
-        delay(3000) // Simulate a 3-second loading time
+        delay(3000)
         isLoading = false
     }
 
     if (isLoading) {
-        // Show the splash screen while loading
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.White),
             contentAlignment = Alignment.Center
         ) {
-            // Use your app's icon as the image in the splash screen
             Image(
-                painter = painterResource(id = R.drawable.app_icon), // Replace with your app's icon resource
-                contentDescription = null, // Provide a description if needed
-                modifier = Modifier.fillMaxSize()// Adjust the size as needed
+                painter = painterResource(id = R.drawable.app_icon),
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize()
             )
         }
     } else {
-        navigateToDashboardScreen()
+        NavigateToDashboardScreen()
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun navigateToDashboardScreen() {
-    // Create a scroll state to manage the scroll position
+fun NavigateToDashboardScreen() {
     val scrollState = rememberScrollState()
     var isNavigateToHazard by remember { mutableStateOf(false) }
-    /*  var showScreen2 by remember { mutableStateOf(false) }
-      var showScreen3 by remember { mutableStateOf(false) }
-  */
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
-            .verticalScroll(scrollState) // Enable vertical scrolling
+            .verticalScroll(scrollState)
     ) {
-        // Content goes here
         TopAppBar(
             modifier = Modifier.background(Color.Black),
             colors = TopAppBarDefaults.topAppBarColors(Color.Black),
@@ -279,8 +261,8 @@ fun navigateToDashboardScreen() {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.app_icon), // Replace with your image resource
-                        contentDescription = null, // Provide a description if needed
+                        painter = painterResource(id = R.drawable.app_icon),
+                        contentDescription = null,
                         modifier = Modifier
                             .size(120.dp)
                             .padding(start = 40.dp, end = 8.dp)
@@ -290,7 +272,7 @@ fun navigateToDashboardScreen() {
             }
         )
         if (isNavigateToHazard) {
-            navigateToReportHazards()
+            NavigateToReportHazards()
         } else {
 
             Button(
@@ -316,7 +298,7 @@ fun navigateToDashboardScreen() {
             }
 
             Button(
-                onClick = { /* Handle button click */ },
+                onClick = { },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp),
@@ -338,7 +320,7 @@ fun navigateToDashboardScreen() {
             }
 
             Button(
-                onClick = { /* Handle button click */ },
+                onClick = { },
                 modifier = Modifier
                     .padding(8.dp)
                     .align(Alignment.CenterHorizontally)
@@ -355,23 +337,63 @@ fun navigateToDashboardScreen() {
 }
 
 
+data class GridItemData(val id: Int, val icon: Int, val title: String)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun navigateToReportHazards() {
+fun NavigateToReportHazards() {
     val scrollState = rememberScrollState()
+    val items = remember {
+        mutableListOf(
+            GridItemData(1, R.drawable.slippery_button_icon, "Hazard Slippery"),
+            GridItemData(2, R.drawable.button_fire, "Fire Hazard"),
+            GridItemData(3, R.drawable.button_hazard, " Hazard"),
+            GridItemData(4, R.drawable.button_record, " Hazard"),
+            // Add more items here
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
-            .height(50.dp)
-            .verticalScroll(rememberScrollState())
+            .height(100.dp)
+            .background(Color.Black),
+        verticalArrangement = Arrangement.Top,
     ) {
-        Text(text = "Area 0000", modifier = Modifier
-            .align(Alignment.CenterHorizontally)
-            .padding(0.dp))
+        Text(
+            text = "Area 0000", modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(0.dp)
+        )
+        Spacer(modifier = Modifier.height(8.dp))
 
-      //  LazyVerticalGrid(columns = 2, content = ContentPadding() )
+        LazyVerticalGrid(
+            GridCells.Fixed(2), // 2 items per row
+            modifier = Modifier.fillMaxHeight()
+                .padding(start = 54.dp, end = 54.dp)
+        ) {
+            items(items) { item ->
+                GridItem(item)
+            }
+        }
 
+    }
+}
+
+@Composable
+fun GridItem(item: GridItemData) {
+    IconButton(
+        onClick = {
+            // Add your click action here
+        },
+        modifier = Modifier
+            .padding(top = 8.dp)
+            .size(32.dp)
+        ) {
+        Image(
+            painter = painterResource(id = item.icon), // Replace with your custom icon
+            contentDescription = null,
+        )
     }
 }
 
