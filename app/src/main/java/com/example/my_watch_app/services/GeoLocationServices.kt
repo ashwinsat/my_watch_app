@@ -13,7 +13,6 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
-import com.example.my_watch_app.geofenceHelper.GeofenceManager
 import com.example.my_watch_app.notifications.NotificationHelper
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -27,6 +26,11 @@ public class GeoLocationServices : Service() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
+    private var locationRequest: LocationRequest? = LocationRequest()
+
+    companion object {
+        const val CHANNEL_ID = "LocationServiceChannel"
+    }
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
@@ -65,7 +69,6 @@ public class GeoLocationServices : Service() {
         return START_STICKY
     }
 
-    private var locationRequest: LocationRequest? = LocationRequest()
     private fun createLocationRequest() {
         if (locationRequest == null) {
             locationRequest = LocationRequest()
@@ -117,24 +120,7 @@ public class GeoLocationServices : Service() {
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
-    companion object {
-        const val CHANNEL_ID = "LocationServiceChannel"
-    }
-
-    private var isShown = false
     private fun showNotification() {
-        if (isShown) {
-            return
-        }
-
-        GeofenceManager.getInstance(this).addGeoFence(
-            13.191266162954298,
-            77.73112967869962,
-            30F,
-            this
-        )
-        isShown = true
         NotificationHelper().showNotification(applicationContext, "Title sample", "Message sample")
     }
-
 }
