@@ -11,6 +11,7 @@ package com.example.my_watch_app.presentation
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -95,6 +96,7 @@ class MainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
     private val viewModel: MainActivityViewModel by viewModels()
+
     @RequiresApi(Build.VERSION_CODES.P)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -226,9 +228,12 @@ fun AppNavigation() {
                 navController.popBackStack("NavigateToDashboardScreen", inclusive = false)
             }
         }
+
+        composable("NavigateToNoticeScreen") {
+            NavigateToNoticeScreen(navController)
+        }
     }
 }
-
 
 @Composable
 fun SplashScreen(navController: NavHostController) {
@@ -266,7 +271,7 @@ fun NavigateToDashboardScreen(navController: NavHostController) {
         }
 
         DashboardButton(text = "Notifications", R.drawable.notifications) {
-
+            navController.navigate("NavigateToNoticeScreen")
         }
 
         CircleButton(text = "More") {
@@ -347,6 +352,22 @@ fun DashboardButton(text: String, iconId: Int, listener: () -> Unit) {
     }
 }
 
+private fun getNotificationData(): Pair<String, String>? {
+    GeoLocationServices.lastKnownLocation?.let { location ->
+        val hazardLoc = FireBaseDBManager.hazardPoints.find { locData ->
+            val storedLoc = locData.location
+            val radius: Long = locData.radius ?: 0
+            val distance = (storedLoc?.distanceTo(location) ?: 0).toLong()
+            distance < radius
+        }
+        if (hazardLoc != null) {
+            // return  GeoLocationServices.lastKnownLocation
+            return Pair("Caution", "${hazardLoc.name} ${hazardLoc.type}")
+        }
+    }
+    return null
+}
+
 
 data class GridItemData(val id: Int, val icon: Int, val title: String)
 
@@ -402,6 +423,51 @@ fun NavigateToReportHazards(navController: NavHostController) {
     }
 }
 
+
+@Composable
+fun NavigateToNoticeScreen(navController: NavHostController) {
+
+    val items = remember {
+        hazardItems
+    }
+
+    val notification = getNotificationData()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        AppBar()
+
+        val modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                navController.popBackStack()
+            }
+        if (notification == null) {
+            Text(
+                text = "There is no notification", modifier,
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
+        } else {
+            Text(
+                text = notification.first ?: "", modifier,
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = notification?.second ?: "", modifier,
+                color = Color.White,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
 @Composable
 fun NavigateToReportWetHazards(
     navController: NavHostController,
@@ -442,9 +508,13 @@ fun NavigateToReportWetHazards(
                 .fillMaxSize()
                 .clickable {
 
-                    FireBaseDBManager().addHazard(GeoLocationServices.lastKnownLocation!!, "Sample tile", "Type",{
-                        onCreateHazard(hazard, iconId, areaId)
-                    }){
+                    FireBaseDBManager().addHazard(
+                        GeoLocationServices.lastKnownLocation!!,
+                        "Test Sample tile",
+                        hazardItems.find { it.id == hazard }?.title ?: "",
+                        {
+                            onCreateHazard(hazard, iconId, areaId)
+                        }) {
 
                     }
                 } // Modify the layout using Modifier if needed
