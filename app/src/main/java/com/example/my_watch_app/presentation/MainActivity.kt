@@ -60,6 +60,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
@@ -373,12 +374,12 @@ data class GridItemData(val id: Int, val icon: Int, val title: String)
 
 
 val hazardItems = mutableListOf(
-    GridItemData(1, R.drawable.fall_hazard_button, "Fall Hazard"),
-    GridItemData(2, R.drawable.button_fire, "Fire Hazard"),
-    GridItemData(3, R.drawable.height_hazard_button, "Height Hazard"),
-    GridItemData(4, R.drawable.electricity, "Electricity Hazard"),
-    GridItemData(5, R.drawable.noise_hazard_button, "Hazard"),
-    GridItemData(6, R.drawable.manual_handling_button, "Manual Handling Hazard"),
+    GridItemData(1, R.drawable.fall_hazard_button, "Fall"),
+    GridItemData(2, R.drawable.button_fire, "Fire"),
+    GridItemData(3, R.drawable.height_hazard_button, "Height"),
+    GridItemData(4, R.drawable.electricity, "Electricity"),
+    GridItemData(5, R.drawable.noise_hazard_button, "Noise"),
+    GridItemData(6, R.drawable.manual_handling_button, "Manual Handling"),
 
     // Add more items here
 )
@@ -507,11 +508,11 @@ fun NavigateToReportWetHazards(
             modifier = Modifier
                 .fillMaxSize()
                 .clickable {
-
+                    val hazardItem = hazardItems.find { it.id == hazard }
                     FireBaseDBManager().addHazard(
                         GeoLocationServices.lastKnownLocation!!,
-                        "Test Sample tile",
-                        hazardItems.find { it.id == hazard }?.title ?: "",
+                        "Hazard ${hazardItem?.title!!}",
+                        hazardItem?.title,
                         {
                             onCreateHazard(hazard, iconId, areaId)
                         }) {
@@ -522,6 +523,9 @@ fun NavigateToReportWetHazards(
     }
 }
 
+private val onCreateHazard = {
+
+}
 
 @Composable
 fun NavigateToReportSummary(
@@ -544,15 +548,47 @@ fun NavigateToReportSummary(
         AppBar()
         Text(text = areaId, modifier = Modifier.clickable {
             onClick()
-        })
-        val hazardItem = hazardItems.find { it.id == hazard }
-        Text(text = "Hazard ${hazardItem?.title} is logged just now",
-            modifier = Modifier
-                .clickable {
-                    onClick()
-                }
-                .padding(30.dp)
+        }, style = TextStyle(fontWeight = FontWeight.Bold)
         )
+        val hazardItem = hazardItems.find { it.id == hazard }
+        Text(
+            text = "Hazard '${hazardItem?.title}' is logged",
+            modifier = Modifier
+                .padding(8.dp)
+                .align(Alignment.CenterHorizontally)
+        )
+        Text(
+            text = "Just now",
+            modifier = Modifier
+                .padding(8.dp)
+                .align(Alignment.CenterHorizontally)
+        )
+        BackButton("Back", onClick)
+        /*    BackButton( = "Just now",
+                modifier = Modifier
+                    .clickable {
+                        onClick()
+                    }
+                    .padding(8.dp)
+                    .align(Alignment.CenterHorizontally)
+            )*/
+    }
+}
+
+@Composable
+fun ColumnScope.BackButton(text: String, listener: () -> Unit) {
+    Button(
+        onClick = listener,
+        modifier = Modifier
+            .padding(8.dp)
+            .align(Alignment.CenterHorizontally)
+            .size(48.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color.DarkGray,
+            contentColor = Color.White
+        )
+    ) {
+        Text("Back", style = TextStyle.Default)
     }
 }
 
