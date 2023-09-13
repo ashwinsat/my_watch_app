@@ -6,11 +6,10 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.INTERNET" />
-
 
     <application
         android:allowBackup="true"
@@ -19,7 +18,12 @@
         android:name=".WatchApplication"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.DeviceDefault">
-<!--        <service
+        <activity
+            android:name=".presentation.MainActivity2"
+            android:exported="false"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar" />
+        <!--
+                <service
             android:name=".complication.MainComplicationService"
             android:exported="true"
             android:label="@string/complication_label"
@@ -47,9 +51,11 @@
             <meta-data
                 android:name="androidx.wear.tiles.PREVIEW"
                 android:resource="@drawable/tile_preview" />
-        </service>-->
-        <service android:enabled="true" android:name=".services.GeoLocationServices" />
-
+        </service>
+        -->
+        <service
+            android:name=".services.GeoLocationServices"
+            android:enabled="true" />
 
         <uses-library
             android:name="com.google.android.wearable"

@@ -8,10 +8,13 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.Location
 import android.os.IBinder
-import android.util.Log
+import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+import com.example.my_watch_app.database.FireBaseDBManager
+import com.example.my_watch_app.models.LocationData
 import com.example.my_watch_app.notifications.NotificationHelper
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -21,10 +24,18 @@ import com.google.android.gms.location.LocationServices
 
 
 @Suppress("DEPRECATION")
-public class GeoLocationServices : Service() {
+class GeoLocationServices : Service() {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
+    private var locationRequest: LocationRequest? = LocationRequest()
+    var lastKnownLocation: Location? = null
+
+    companion
+
+    object {
+        const val CHANNEL_ID = "LocationServiceChannel"
+    }
 
     override fun onBind(p0: Intent?): IBinder? {
         return null
@@ -63,7 +74,6 @@ public class GeoLocationServices : Service() {
         return START_STICKY
     }
 
-    private var locationRequest: LocationRequest? = LocationRequest()
     private fun createLocationRequest() {
         if (locationRequest == null) {
             locationRequest = LocationRequest()
@@ -73,9 +83,19 @@ public class GeoLocationServices : Service() {
         locationRequest!!.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(p0: LocationResult) {
-                p0.lastLocation?.let {
-                    Log.d("GeoLocationServices", "onLocationResult received : ${p0.toString()}")
-                    showNotification()
+                p0.lastLocation?.let { location ->
+                    lastKnownLocation = location
+                    val hazardLoc = FireBaseDBManager.hazardPoints.find { locData ->
+                        val storedLoc = locData.location
+                        val radius: Long = locData.radius ?: 0
+                        val distance = (storedLoc?.distanceTo(location) ?: 0).toLong()
+                        distance < radius
+                    }
+                    if (hazardLoc != null) {
+                        showNotification(hazardLoc)
+                    }
+                    // Test code
+                    FireBaseDBManager().addHazard(location, "Sample tile", "Type")
                 }
             }
         }
@@ -106,17 +126,11 @@ public class GeoLocationServices : Service() {
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
-    companion object {
-        const val CHANNEL_ID = "LocationServiceChannel"
+    private fun showNotification(hazardLoc: LocationData) {
+        NotificationHelper().showNotification(
+            applicationContext,
+            hazardLoc.name ?: "",
+            hazardLoc.type ?: ""
+        )
     }
-
-    private var isShown = false
-    private fun showNotification() {
-        if (isShown) {
-            return
-        }
-        isShown = true
-        NotificationHelper().showNotification(applicationContext, "Title sample", "Message sample")
-    }
-
 }
