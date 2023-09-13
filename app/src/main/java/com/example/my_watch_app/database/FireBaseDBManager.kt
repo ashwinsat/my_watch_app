@@ -6,6 +6,7 @@ import com.example.my_watch_app.models.LocationData
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.GeoPoint
+import com.google.logging.type.LogSeverity
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -43,6 +44,7 @@ class FireBaseDBManager {
                         locationData.endTime = data["EndTime"] as Timestamp?
                         locationData.name = data["Name"].toString()
                         locationData.type = data["Type"].toString()
+                        locationData.severity = data["severity"].toString()
                         locationData.geo = data["geo"] as GeoPoint?
                         locationData.radius = data["radius"] as Long?
 
@@ -66,6 +68,7 @@ class FireBaseDBManager {
         location: Location,
         title: String,
         type: String,
+        severity: String,
         onSuccess: ()->Unit,
         onFailure: ()->Unit,
     ) {
@@ -80,7 +83,8 @@ class FireBaseDBManager {
             "Name" to title,
             "Type" to type,
             "EndTime" to formattedDate, // Added the same for testing
-            "geo" to GeoPoint(location.latitude, location.longitude)
+            "geo" to GeoPoint(location.latitude, location.longitude),
+            "severity" to severity
         )
         getFireBaseDBManager().
         collection("Projects").

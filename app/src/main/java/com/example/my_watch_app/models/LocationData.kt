@@ -9,6 +9,7 @@ class LocationData {
     var endTime: Timestamp? = null
     var name: String? = null
     var type: String? = null
+    var severity: String? = null
     var geo: GeoPoint? = null
     var radius: Long? = null
     var location: Location? = null

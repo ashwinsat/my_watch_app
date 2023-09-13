@@ -363,7 +363,7 @@ private fun getNotificationData(): Pair<String, String>? {
         }
         if (hazardLoc != null) {
             // return  GeoLocationServices.lastKnownLocation
-            return Pair("Caution", "${hazardLoc.name} ${hazardLoc.type}")
+            return Pair("Caution", "Found ${hazardLoc.name} with severity ${hazardLoc.severity}")
         }
     }
     return null
@@ -512,7 +512,8 @@ fun NavigateToReportWetHazards(
                     FireBaseDBManager().addHazard(
                         GeoLocationServices.lastKnownLocation!!,
                         "Hazard ${hazardItem?.title!!}",
-                        hazardItem?.title,
+                        hazardItem.title,
+                        selectedOption.value,
                         {
                             onCreateHazard(hazard, iconId, areaId)
                         }) {
