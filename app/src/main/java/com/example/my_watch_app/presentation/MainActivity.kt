@@ -15,6 +15,7 @@ import android.os.Bundle
 import android.widget.ImageButton
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -61,6 +62,7 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -73,9 +75,11 @@ import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.Text
 import com.example.my_watch_app.R
 import com.example.my_watch_app.services.GeoLocationServices
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 
 @Suppress("DEPRECATION")
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     /*    private lateinit var geofencingClient: GeofencingClient
@@ -91,6 +95,7 @@ class MainActivity : ComponentActivity() {
     // buttons to indicate sevearity
 
     @OptIn(ExperimentalMaterial3Api::class)
+    private val viewModel: MainActivityViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         /*      geofencingClient = LocationServices.getGeofencingClient(this)*/
