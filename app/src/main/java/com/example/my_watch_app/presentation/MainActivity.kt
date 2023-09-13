@@ -12,6 +12,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.widget.ImageButton
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -38,6 +39,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,10 +49,8 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -255,7 +255,39 @@ fun AppNavigation() {
             NavigateToReportHazards(navController)
         }
         composable(
-            route = "NavigateToReportWetHazards/{hazardId}/{areaId}",
+            route = "NavigateToReportWetHazards/{hazardId}/{iconId}/{areaId}",
+            arguments = listOf(navArgument("hazardId") {
+                type = NavType.IntType
+                defaultValue = 0
+                nullable = false
+            }, navArgument("areaId") {
+                type = NavType.StringType
+                defaultValue = ""
+                nullable = false
+            },
+                navArgument("iconId") {
+                    type = NavType.IntType
+                    defaultValue = R.drawable.button_fire
+                    nullable = false
+                }
+            )
+        ) { navBackStackEntry ->
+            val hazardId = navBackStackEntry.arguments?.getInt("hazardId", 0) ?: 0
+            val areaId = navBackStackEntry.arguments?.getString("areaId", "") ?: ""
+            val iconId = navBackStackEntry.arguments?.getInt("iconId", R.drawable.button_fire)
+                ?: R.drawable.button_fire
+            NavigateToReportWetHazards(
+                navController,
+                hazardId,
+                iconId,
+                areaId
+            ) { hazard1, icon, areaId1 ->
+                navController.navigate("NavigateToReportSummary/${hazard1}/${icon}/${areaId1}")
+            }
+        }
+
+        composable(
+            "NavigateToReportSummary/{hazardId}/{iconId}/{areaId}",
             arguments = listOf(navArgument("hazardId") {
                 type = NavType.IntType
                 defaultValue = 0
@@ -268,29 +300,12 @@ fun AppNavigation() {
         ) { navBackStackEntry ->
             val hazardId = navBackStackEntry.arguments?.getInt("hazardId", 0) ?: 0
             val areaId = navBackStackEntry.arguments?.getString("areaId", "") ?: ""
-            NavigateToReportWetHazards(navController, hazardId, areaId) { hazard1, areaId1 ->
-                navController.navigate("NavigateToReportSummary/${hazard1}/${areaId1}")
-            }
-        }
-
-        composable("NavigateToReportSummary/{hazardId}/{areaId}", arguments = listOf(navArgument("hazardId") {
-            type = NavType.IntType
-            defaultValue = 0
-            nullable = false
-        }, navArgument("areaId") {
-            type = NavType.StringType
-            defaultValue = ""
-            nullable = false
-        })) { navBackStackEntry ->
-            val hazardId = navBackStackEntry.arguments?.getInt("hazardId", 0) ?: 0
-            val areaId = navBackStackEntry.arguments?.getString("areaId", "") ?: ""
             NavigateToReportSummary(navController, hazardId, areaId) {
                 navController.popBackStack("NavigateToDashboardScreen", inclusive = false)
             }
         }
     }
 }
-
 
 
 @Composable
@@ -324,11 +339,11 @@ fun NavigateToDashboardScreen(navController: NavHostController) {
             .verticalScroll(scrollState)
     ) {
         AppBar()
-        DashboardButton(text = "Report Hazard") {
+        DashboardButton(text = "Report Hazard", R.drawable.hazard_icon) {
             navController.navigate("NavigateToReportHazards")
         }
 
-        DashboardButton(text = "Notifications") {
+        DashboardButton(text = "Notifications", R.drawable.notifications) {
 
         }
 
@@ -386,7 +401,7 @@ fun ColumnScope.CircleButton(text: String, listener: () -> Unit) {
 }
 
 @Composable
-fun DashboardButton(text: String, listener: () -> Unit) {
+fun DashboardButton(text: String, iconId: Int, listener: () -> Unit) {
     Button(
         onClick = { listener() },
         modifier = Modifier
@@ -401,7 +416,7 @@ fun DashboardButton(text: String, listener: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
-                painter = painterResource(id = R.drawable.hazard_icon),
+                painter = painterResource(id = iconId),
                 contentDescription = null
             )
             Spacer(modifier = Modifier.width(4.dp))
@@ -413,30 +428,18 @@ fun DashboardButton(text: String, listener: () -> Unit) {
 
 data class GridItemData(val id: Int, val icon: Int, val title: String)
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun NavigateToReportWetHazards() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .height(100.dp)
-            .background(Color.Black),
-        verticalArrangement = Arrangement.Top,
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.slippery_button_icon), // Replace with your drawable resource ID
-            contentDescription = null, // You can provide a content description if needed
-            modifier = Modifier.fillMaxSize() // Modify the layout using Modifier if needed
-        )
-    }
-}
+
 val hazardItems = mutableListOf(
-    GridItemData(1, R.drawable.slippery_button_icon, "Slippery"),
+    GridItemData(1, R.drawable.fall_hazard_button, "Fall Hazard"),
     GridItemData(2, R.drawable.button_fire, "Fire Hazard"),
-    GridItemData(3, R.drawable.button_hazard, " Hazard"),
-    GridItemData(4, R.drawable.button_record, " Hazard"),
+    GridItemData(3, R.drawable.height_hazard_button, "Height Hazard"),
+    GridItemData(4, R.drawable.electricity, "Electricity Hazard"),
+    GridItemData(5, R.drawable.noise_hazard_button, "Hazard"),
+    GridItemData(6, R.drawable.manual_handling_button, "Manual Handling Hazard"),
+
     // Add more items here
 )
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigateToReportHazards(navController: NavHostController) {
@@ -463,14 +466,14 @@ fun NavigateToReportHazards(navController: NavHostController) {
         Spacer(modifier = Modifier.height(8.dp))
 
         LazyVerticalGrid(
-            GridCells.Fixed(2), // 2 items per row
+            GridCells.Fixed(3), // 2 items per row
             modifier = Modifier
                 .fillMaxHeight()
-                .padding(start = 54.dp, end = 54.dp)
+                .padding(start = 40.dp, end = 40.dp)
         ) {
             items(items) { item ->
                 GridItem(item) {
-                    navController.navigate("NavigateToReportWetHazards/${item.id}/${selectedOption.value}")
+                    navController.navigate("NavigateToReportWetHazards/${item.id}/${item.icon}/${selectedOption.value}")
                 }
             }
         }
@@ -481,29 +484,42 @@ fun NavigateToReportHazards(navController: NavHostController) {
 fun NavigateToReportWetHazards(
     navController: NavHostController,
     hazard: Int,
+    iconId: Int,
     areaId: String,
-    onClick: (hazard: Int, areaId: String) -> Unit
+    onCreateHazard: (hazard: Int, iconId: Int, areaId: String) -> Unit
 ) {
+    val scrollState = rememberScrollState()
     val selectedOption: MutableState<String> = remember { mutableStateOf("High") }
     val options = listOf("High", "Medium", "Low")
     val expanded = remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black),
+            .padding(8.dp)
+            .background(Color.Black)
+            .verticalScroll(scrollState),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         AppBar()
         AreaSelector(selectedOption, expanded, options)
         Image(
-            painter = painterResource(id = R.drawable.slippery_button_icon), // Replace with your drawable resource ID
+            painter = painterResource(id = iconId), // Replace with your drawable resource ID
             contentDescription = null, // You can provide a content description if needed
             modifier = Modifier
                 .fillMaxSize()
-                .padding(30.dp)
+                .padding(20.dp)
+            /*.clickable {
+                onClick(hazard, iconId, areaId)
+            } // Modify the layout using Modifier if needed*/
+        )
+        Icon(
+            Icons.Default.CheckCircle, // Replace with your drawable resource ID
+            contentDescription = null, // You can provide a content description if needed
+            modifier = Modifier
+                .fillMaxSize()
                 .clickable {
-                    onClick(hazard, areaId)
+                    onCreateHazard(hazard, iconId, areaId)
                 } // Modify the layout using Modifier if needed
         )
     }
@@ -526,6 +542,7 @@ fun NavigateToReportSummary(
             .background(Color.Black),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally
+
     ) {
         AppBar()
         Text(text = areaId, modifier = Modifier.clickable {
@@ -533,9 +550,12 @@ fun NavigateToReportSummary(
         })
         val hazardItem = hazardItems.find { it.id == hazard }
         Text(text = "Hazard ${hazardItem?.title} is logged just now",
-            modifier = Modifier.clickable {
-                onClick()
-            }.padding(30.dp))
+            modifier = Modifier
+                .clickable {
+                    onClick()
+                }
+                .padding(30.dp)
+        )
     }
 }
 
