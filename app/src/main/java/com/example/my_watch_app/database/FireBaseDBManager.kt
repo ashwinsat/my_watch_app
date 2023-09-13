@@ -38,8 +38,8 @@ class FireBaseDBManager {
 
                     // Access specific fields
                     val locationData = LocationData()
-                    locationData.startTime = data["StartTime"] as Timestamp?
-                    locationData.endTime = data["EndTime"] as Timestamp?
+//                    locationData.startTime = data["StartTime"] as String?
+//                    locationData.endTime = data["EndTime"] as String?
                     locationData.name = data["Name"].toString()
                     locationData.type = data["Type"].toString()
                     locationData.geo = data["geo"] as GeoPoint?

@@ -5,8 +5,8 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.GeoPoint
 
 class LocationData {
-    var startTime: Timestamp? = null
-    var endTime: Timestamp? = null
+    var startTime: String? = null
+    var endTime: String? = null
     var name: String? = null
     var type: String? = null
     var geo: GeoPoint? = null

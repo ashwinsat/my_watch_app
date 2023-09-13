@@ -10,6 +10,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.IBinder
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
@@ -84,6 +85,7 @@ class GeoLocationServices : Service() {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(p0: LocationResult) {
                 p0.lastLocation?.let { location ->
+                    Log.d("GeoLocationServices","Current location : ${location.latitude} | ${location.longitude}")
                     lastKnownLocation = location
                     val hazardLoc = FireBaseDBManager.hazardPoints.find { locData ->
                         val storedLoc = locData.location
@@ -94,8 +96,6 @@ class GeoLocationServices : Service() {
                     if (hazardLoc != null) {
                         showNotification(hazardLoc)
                     }
-                    // Test code
-                    FireBaseDBManager().addHazard(location, "Sample tile", "Type")
                 }
             }
         }
