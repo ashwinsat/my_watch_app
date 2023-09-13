@@ -20,6 +20,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -45,6 +46,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,6 +61,12 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.Icon
@@ -87,7 +95,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         /*      geofencingClient = LocationServices.getGeofencingClient(this)*/
         setContent {
-            SplashScreen()
+            AppNavigation()
         }
 
         /*        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
@@ -230,121 +238,174 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun SplashScreen() {
-    var isLoading by remember { mutableStateOf(true) }
-    LaunchedEffect(key1 = isLoading) {
-        delay(3000)
-        isLoading = false
-    }
-
-    if (isLoading) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                painter = painterResource(id = R.drawable.app_icon),
-                contentDescription = null,
-                modifier = Modifier.fillMaxSize()
-            )
+fun AppNavigation() {
+    val navController = rememberNavController()
+    NavHost(
+        navController = navController, // You should create a NavController
+        startDestination = "splashScreen"
+    ) {
+        // Define your destinations using composable
+        composable("splashScreen") {
+            SplashScreen(navController)
         }
-    } else {
-        NavigateToDashboardScreen()
+        composable("NavigateToDashboardScreen") {
+            NavigateToDashboardScreen(navController)
+        }
+        composable("NavigateToReportHazards") {
+            NavigateToReportHazards(navController)
+        }
+        composable(
+            route = "NavigateToReportWetHazards/{hazardId}/{areaId}",
+            arguments = listOf(navArgument("hazardId") {
+                type = NavType.IntType
+                defaultValue = 0
+                nullable = false
+            }, navArgument("areaId") {
+                type = NavType.StringType
+                defaultValue = ""
+                nullable = false
+            })
+        ) { navBackStackEntry ->
+            val hazardId = navBackStackEntry.arguments?.getInt("hazardId", 0) ?: 0
+            val areaId = navBackStackEntry.arguments?.getString("areaId", "") ?: ""
+            NavigateToReportWetHazards(navController, hazardId, areaId) { hazard1, areaId1 ->
+                navController.navigate("NavigateToReportSummary/${hazard1}/${areaId1}")
+            }
+        }
+
+        composable("NavigateToReportSummary/{hazardId}/{areaId}", arguments = listOf(navArgument("hazardId") {
+            type = NavType.IntType
+            defaultValue = 0
+            nullable = false
+        }, navArgument("areaId") {
+            type = NavType.StringType
+            defaultValue = ""
+            nullable = false
+        })) { navBackStackEntry ->
+            val hazardId = navBackStackEntry.arguments?.getInt("hazardId", 0) ?: 0
+            val areaId = navBackStackEntry.arguments?.getString("areaId", "") ?: ""
+            NavigateToReportSummary(navController, hazardId, areaId) {
+                navController.popBackStack("NavigateToDashboardScreen", inclusive = false)
+            }
+        }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+
+
 @Composable
-fun NavigateToDashboardScreen() {
+fun SplashScreen(navController: NavHostController) {
+    LaunchedEffect(key1 = Unit) {
+        delay(3000)
+        navController.navigate("NavigateToDashboardScreen")
+    }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.app_icon),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize()
+        )
+    }
+}
+
+
+@Composable
+fun NavigateToDashboardScreen(navController: NavHostController) {
     val scrollState = rememberScrollState()
-    var isNavigateToHazard by remember { mutableStateOf(false) }
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
             .verticalScroll(scrollState)
     ) {
-        TopAppBar(
-            modifier = Modifier.background(Color.Black),
-            colors = TopAppBarDefaults.topAppBarColors(Color.Black),
-            title = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.app_icon),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(120.dp)
-                            .padding(start = 40.dp, end = 8.dp)
+        AppBar()
+        DashboardButton(text = "Report Hazard") {
+            navController.navigate("NavigateToReportHazards")
+        }
 
-                    )
-                }
+        DashboardButton(text = "Notifications") {
+
+        }
+
+        CircleButton(text = "More") {
+
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AppBar() {
+    TopAppBar(
+        modifier = Modifier.background(Color.Black),
+        colors = TopAppBarDefaults.topAppBarColors(Color.Black),
+        title = {
+
+        },
+        actions = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.app_icon),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(80.dp)
+
+                    //.padding(start = 40.dp, end = 8.dp)
+
+                )
             }
+        }
+    )
+}
+
+@Composable
+fun ColumnScope.CircleButton(text: String, listener: () -> Unit) {
+    Button(
+        onClick = { },
+        modifier = Modifier
+            .padding(8.dp)
+            .align(Alignment.CenterHorizontally)
+            .size(48.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color.DarkGray,
+            contentColor = Color.White
         )
-        if (isNavigateToHazard) {
-            NavigateToReportHazards()
-        } else {
+    ) {
+        Text("More", style = TextStyle.Default)
+    }
+}
 
-            Button(
-                onClick = { isNavigateToHazard = true },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color.DarkGray,
-                    contentColor = Color.White
-                )
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.hazard_icon),
-                        contentDescription = null
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Report Hazard", style = TextStyle.Default)
-                }
-            }
-
-            Button(
-                onClick = { },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color.DarkGray,
-                    contentColor = Color.White
-                )
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.notifications),
-                        contentDescription = null
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text("Notifications", style = TextStyle.Default)
-                }
-            }
-
-            Button(
-                onClick = { },
-                modifier = Modifier
-                    .padding(8.dp)
-                    .align(Alignment.CenterHorizontally)
-                    .size(48.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color.DarkGray,
-                    contentColor = Color.White
-                )
-            ) {
-                Text("More", style = TextStyle.Default)
-            }
+@Composable
+fun DashboardButton(text: String, listener: () -> Unit) {
+    Button(
+        onClick = { listener() },
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = Color.DarkGray,
+            contentColor = Color.White
+        )
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.hazard_icon),
+                contentDescription = null
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Text(text, style = TextStyle.Default)
         }
     }
 }
@@ -354,21 +415,7 @@ data class GridItemData(val id: Int, val icon: Int, val title: String)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavigateToReportHazards() {
-    val scrollState = rememberScrollState()
-    val items = remember {
-        mutableListOf(
-            GridItemData(1, R.drawable.slippery_button_icon, "Hazard Slippery"),
-            GridItemData(2, R.drawable.button_fire, "Fire Hazard"),
-            GridItemData(3, R.drawable.button_hazard, " Hazard"),
-            GridItemData(4, R.drawable.button_record, " Hazard"),
-            // Add more items here
-        )
-    }
-    var selectedOption by remember { mutableStateOf("Area 1") }
-    val options = listOf("Area 1", "Area 2", "Area 3", "Area 4", "Area 5", "Area 6")
-    var expanded by remember { mutableStateOf(false) }
-
+fun NavigateToReportWetHazards() {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -376,48 +423,43 @@ fun NavigateToReportHazards() {
             .background(Color.Black),
         verticalArrangement = Arrangement.Top,
     ) {
-        /*   Text(
-               text = "Area 0000", modifier = Modifier
-                   .align(Alignment.CenterHorizontally)
-                   .padding(0.dp)
-           )*/
+        Image(
+            painter = painterResource(id = R.drawable.slippery_button_icon), // Replace with your drawable resource ID
+            contentDescription = null, // You can provide a content description if needed
+            modifier = Modifier.fillMaxSize() // Modify the layout using Modifier if needed
+        )
+    }
+}
+val hazardItems = mutableListOf(
+    GridItemData(1, R.drawable.slippery_button_icon, "Slippery"),
+    GridItemData(2, R.drawable.button_fire, "Fire Hazard"),
+    GridItemData(3, R.drawable.button_hazard, " Hazard"),
+    GridItemData(4, R.drawable.button_record, " Hazard"),
+    // Add more items here
+)
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NavigateToReportHazards(navController: NavHostController) {
+    val scrollState = rememberScrollState()
+    val items = remember {
+        hazardItems
+    }
+    val selectedOption: MutableState<String> = remember { mutableStateOf("Area 1") }
+    val options = listOf("Area 1", "Area 2", "Area 3", "Area 4", "Area 5", "Area 6")
+    val expanded = remember { mutableStateOf(false) }
 
-        Box(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .height(20.dp)
-                .background(color = Color.Transparent, shape = RoundedCornerShape(4.dp))
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { expanded = !expanded }
-                    .padding(start= 64.dp),
-                verticalAlignment = Alignment.CenterVertically
 
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        AppBar()
 
-            ) {
-                Text(text = selectedOption, color = Color.White)
-                Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = null
-                )
-            }
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.fillMaxWidth().background(color = Color.Black).padding(16.dp)
-            ) {
-                options.forEach { option ->
-                    DropdownMenuItem(onClick = {
-                        selectedOption = option
-                        expanded = false
-                    },
-                        text = { Text(text = option, color = Color.White) })
+        AreaSelector(selectedOption, expanded, options)
 
-                }
-            }
-        }
         Spacer(modifier = Modifier.height(8.dp))
 
         LazyVerticalGrid(
@@ -427,18 +469,134 @@ fun NavigateToReportHazards() {
                 .padding(start = 54.dp, end = 54.dp)
         ) {
             items(items) { item ->
-                GridItem(item)
+                GridItem(item) {
+                    navController.navigate("NavigateToReportWetHazards/${item.id}/${selectedOption.value}")
+                }
             }
         }
-
     }
 }
 
 @Composable
-fun GridItem(item: GridItemData) {
+fun NavigateToReportWetHazards(
+    navController: NavHostController,
+    hazard: Int,
+    areaId: String,
+    onClick: (hazard: Int, areaId: String) -> Unit
+) {
+    val selectedOption: MutableState<String> = remember { mutableStateOf("High") }
+    val options = listOf("High", "Medium", "Low")
+    val expanded = remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        AppBar()
+        AreaSelector(selectedOption, expanded, options)
+        Image(
+            painter = painterResource(id = R.drawable.slippery_button_icon), // Replace with your drawable resource ID
+            contentDescription = null, // You can provide a content description if needed
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(30.dp)
+                .clickable {
+                    onClick(hazard, areaId)
+                } // Modify the layout using Modifier if needed
+        )
+    }
+}
+
+
+@Composable
+fun NavigateToReportSummary(
+    navController: NavHostController,
+    hazard: Int,
+    areaId: String,
+    onClick: () -> Unit
+) {
+    val selectedOption: MutableState<String> = remember { mutableStateOf("High") }
+    val options = listOf("High", "Medium", "Low")
+    val expanded = remember { mutableStateOf(false) }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        AppBar()
+        Text(text = areaId, modifier = Modifier.clickable {
+            onClick()
+        })
+        val hazardItem = hazardItems.find { it.id == hazard }
+        Text(text = "Hazard ${hazardItem?.title} is logged just now",
+            modifier = Modifier.clickable {
+                onClick()
+            }.padding(30.dp))
+    }
+}
+
+@Composable
+fun ColumnScope.AreaSelector(
+    selectedOption: MutableState<String>,
+    expanded: MutableState<Boolean>,
+    options: List<String>
+) {
+    Box(
+        modifier = Modifier
+            .align(Alignment.CenterHorizontally)
+            .height(20.dp)
+            .background(color = Color.Transparent, shape = RoundedCornerShape(4.dp)),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded.value = !expanded.value },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(text = selectedOption.value, color = Color.White)
+            Icon(
+                imageVector = Icons.Default.ArrowDropDown,
+                contentDescription = null
+            )
+        }
+        DropdownMenu(
+            expanded = expanded.value,
+            onDismissRequest = { expanded.value = false },
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(color = Color.Black)
+                .padding(16.dp),
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(onClick = {
+                    selectedOption.value = option
+                    expanded.value = false
+                },
+                    text = {
+                        Text(
+                            text = option,
+                            color = Color.White,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        )
+                    })
+
+            }
+        }
+    }
+}
+
+@Composable
+fun GridItem(item: GridItemData, onClick: () -> Unit) {
     IconButton(
         onClick = {
-            // Add your click action here
+            onClick()
         },
         modifier = Modifier
             .padding(top = 8.dp)
