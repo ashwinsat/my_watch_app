@@ -70,7 +70,7 @@ class FireBaseDBManager {
 
         val data = hashMapOf(
             "StartTime" to formattedDate,
-            "EndTime" to 42,
+            "radius" to 30,
             "Name" to title,
             "Type" to type,
             "EndTime" to formattedDate, // Added the same for testing
