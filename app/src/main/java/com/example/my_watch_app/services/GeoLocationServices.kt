@@ -29,11 +29,10 @@ class GeoLocationServices : Service() {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
     private var locationRequest: LocationRequest? = LocationRequest()
-    var lastKnownLocation: Location? = null
 
-    companion
 
-    object {
+    companion object {
+        var lastKnownLocation: Location? = null
         const val CHANNEL_ID = "LocationServiceChannel"
     }
 
@@ -95,7 +94,7 @@ class GeoLocationServices : Service() {
                         showNotification(hazardLoc)
                     }
                     // Test code
-                    FireBaseDBManager().addHazard(location, "Sample tile", "Type")
+
                 }
             }
         }

@@ -6,20 +6,18 @@
 
 package com.example.my_watch_app.presentation
 
-import android.Manifest
 //import androidx.compose.material3.Surface
 
-import android.annotation.SuppressLint
+import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.ImageButton
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.activity.viewModels
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -66,7 +64,6 @@ import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -79,7 +76,6 @@ import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.Text
 import com.example.my_watch_app.R
 import com.example.my_watch_app.database.FireBaseDBManager
-import com.example.my_watch_app.presentation.theme.My_watch_appTheme
 import com.example.my_watch_app.services.GeoLocationServices
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
@@ -445,7 +441,12 @@ fun NavigateToReportWetHazards(
             modifier = Modifier
                 .fillMaxSize()
                 .clickable {
-                    onCreateHazard(hazard, iconId, areaId)
+
+                    FireBaseDBManager().addHazard(GeoLocationServices.lastKnownLocation!!, "Sample tile", "Type",{
+                        onCreateHazard(hazard, iconId, areaId)
+                    }){
+
+                    }
                 } // Modify the layout using Modifier if needed
         )
     }

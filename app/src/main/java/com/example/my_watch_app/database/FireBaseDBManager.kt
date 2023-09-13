@@ -34,22 +34,26 @@ class FireBaseDBManager {
             .addOnSuccessListener { querySnapshot ->
                 for (documentSnapshot in querySnapshot) {
                     // Access the data of each document
-                    val data = documentSnapshot.data
+                    try{
+                        val data = documentSnapshot.data
 
-                    // Access specific fields
-                    val locationData = LocationData()
-                    locationData.startTime = data["StartTime"] as Timestamp?
-                    locationData.endTime = data["EndTime"] as Timestamp?
-                    locationData.name = data["Name"].toString()
-                    locationData.type = data["Type"].toString()
-                    locationData.geo = data["geo"] as GeoPoint?
-                    locationData.radius = data["radius"] as Long?
+                        // Access specific fields
+                        val locationData = LocationData()
+                        locationData.startTime = data["StartTime"] as Timestamp?
+                        locationData.endTime = data["EndTime"] as Timestamp?
+                        locationData.name = data["Name"].toString()
+                        locationData.type = data["Type"].toString()
+                        locationData.geo = data["geo"] as GeoPoint?
+                        locationData.radius = data["radius"] as Long?
 
-                    locationData.location = Location("")
-                    locationData.location!!.latitude = locationData.geo?.latitude ?: 0.0
-                    locationData.location!!.longitude = locationData.geo?.longitude ?: 0.0
-                    locationData.location
-                    hazardPoints.add(locationData)
+                        locationData.location = Location("")
+                        locationData.location!!.latitude = locationData.geo?.latitude ?: 0.0
+                        locationData.location!!.longitude = locationData.geo?.longitude ?: 0.0
+                        locationData.location
+                        hazardPoints.add(locationData)
+                    }catch (exception:Exception){
+                        Log.d(this::class.java.simpleName, "getAllHazardLocations: ")
+                    }
                 }
             }
             .addOnFailureListener { exception ->
@@ -61,7 +65,9 @@ class FireBaseDBManager {
     fun addHazard(
         location: Location,
         title: String,
-        type: String
+        type: String,
+        onSuccess: ()->Unit,
+        onFailure: ()->Unit,
     ) {
         val currentTimestampMillis = System.currentTimeMillis()
         val currentDate = Date(currentTimestampMillis)
@@ -84,10 +90,12 @@ class FireBaseDBManager {
             .addOnSuccessListener { documentReference ->
                 // Document added with ID
                 Log.d("TAG", "DocumentSnapshot added with ID: ${documentReference.id}")
+                onSuccess()
             }
             .addOnFailureListener { e ->
                 // Handle errors here
                 Log.w("TAG", "Error adding document", e)
+                onFailure()
             }
     }
 
