@@ -434,7 +434,7 @@ val hazardItems = mutableListOf(
     GridItemData(2, R.drawable.button_fire, "Fire Hazard"),
     GridItemData(3, R.drawable.height_hazard_button, "Height Hazard"),
     GridItemData(4, R.drawable.electricity, "Electricity Hazard"),
-    GridItemData(5, R.drawable.noise_hazard_button, "Hazard"),
+    GridItemData(5, R.drawable.noise_hazard_button, "Noise Hazard"),
     GridItemData(6, R.drawable.manual_handling_button, "Manual Handling Hazard"),
 
     // Add more items here
@@ -525,6 +525,9 @@ fun NavigateToReportWetHazards(
     }
 }
 
+private val onCreateHazard = {
+
+}
 
 @Composable
 fun NavigateToReportSummary(
@@ -549,7 +552,7 @@ fun NavigateToReportSummary(
             onClick()
         })
         val hazardItem = hazardItems.find { it.id == hazard }
-        Text(text = "Hazard ${hazardItem?.title} is logged just now",
+        Text(text = "${hazardItem?.title} is logged now",
             modifier = Modifier
                 .clickable {
                     onClick()
